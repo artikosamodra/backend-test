@@ -1,6 +1,7 @@
 //'require' is one of the method, get library NPM or get import your file. (can also @import)
 const http = require("http");
 const rupiah = require("rupiah-format");
+const fs = require("fs");
 const port = 5501;
 const host = "127.0.0.1"; //can localhost
 
@@ -9,19 +10,25 @@ const server = http.createServer(function (request, response) {
   //this area >> command req(GET, POST, PUT, DELETE) & res.
 
   const name = "Artiko";
-  const wallet = 1000000;
-  const payment = 46200;
-  const balance = wallet - payment;
+  let wallet = 1000000;
+  let payment = 46200;
+  let preWallet = wallet;
 
-  //   wallet = rupiah.convert(wallet);
-  //   payment = rupiah.convert(payment);
-  //   balance = rupiah.convert(balance);
+  let balance = wallet - payment;
+  wallet = balance;
 
-  //   //   Rupiah Format
-  const walletRp = rupiah.convert(wallet);
-  const paymentRp = rupiah.convert(payment);
-  const invoiceRp = rupiah.convert(balance);
-  console.log("All Balance", invoiceRp);
+  //convert to Rupiah
+  walletRp = rupiah.convert(wallet);
+  paymentRp = rupiah.convert(payment);
+  preWalletRp = rupiah.convert(preWallet);
+  balanceRp = rupiah.convert(balance);
+
+  //kirim data ke mutasi.txt
+  fs.appendFile("mutasi.txt", paymentRp + `\t` + balanceRp + `\n`, () => {
+    console.log("Pembayaran berhasil = " + paymentRp);
+    console.log("Saldo tersisa = " + balanceRp);
+    console.log("Data transaksi anda tersimpan");
+  });
 
   const invoice = `
   <head>
@@ -37,15 +44,19 @@ const server = http.createServer(function (request, response) {
             </tr>
             <tr>
                 <td style="padding: 0 1rem;">Previous Balance</td>
-                <td style="padding: 0 1rem; font-weight: bold;">: ${walletRp}</td>
+                <td style="padding: 0 1rem; font-weight: bold;">: ${preWalletRp}</td>
             </tr>
             <tr>
                 <td style="padding: 0 1rem;">Purchase Costs</td>
                 <td style="padding: 0 1rem; font-weight: bold;">: ${paymentRp}</td>
             </tr>
             <tr>
+                <td style="padding: 0 1rem;">After Payment</td>
+                <td style="padding: 0 1rem; font-weight: bold;">: ${balanceRp}</td>
+            </tr>
+            <tr>
                 <td style="padding: 0 1rem;">Remaining Balance</td>
-                <td style="padding: 0 1rem; font-weight: bold;">: ${invoiceRp}</td>
+                <td style="padding: 0 1rem; font-weight: bold;">: ${walletRp}</td>
             </tr>
         </table>
     </div>
